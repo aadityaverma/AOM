@@ -16,6 +16,9 @@ export interface CanvasEdge {
   id?: string;
   from: string;
   to: string;
+  arrow?: 'none' | 'arrow' | 'both';
+  color?: string;
+  label?: string;
 }
 
 export interface CanvasData {

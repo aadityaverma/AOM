@@ -18,6 +18,9 @@ export const EdgeSchema = z.object({
   id: z.string().optional(),
   from: z.string(),
   to: z.string(),
+  arrow: z.enum(['none','arrow','both']).optional(),
+  color: z.string().optional(),
+  label: z.string().optional(),
 });
 
 export const CanvasSchema = z.object({

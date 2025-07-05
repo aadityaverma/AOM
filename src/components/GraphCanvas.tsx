@@ -11,13 +11,23 @@ interface GraphCanvasProps {
 }
 
 function Node({ id, position, label }: { id: string; position: [number, number, number]; label?: string }) {
-  const selected = useCanvasStore((s) => s.selectedNodeId === id);
-  const click = useCanvasStore((s) => s.nodeClicked);
+  const selected = useCanvasStore((s) => s.selectedNodeIds.has(id));
+  const toggleSelect = useCanvasStore((s)=>s.toggleSelect);
+  const nodeClick = useCanvasStore((s)=>s.nodeClicked);
   return (
     <TransformControls>
       <group position={position}>
         <mesh
-          onClick={() => click(id)}
+          onClick={(e)=>{
+            e.stopPropagation();
+            const additive = e.shiftKey || e.ctrlKey || e.metaKey;
+            toggleSelect(id, additive);
+            nodeClick(id);
+          }}
+          onContextMenu={(e)=>{
+            e.preventDefault();
+            useCanvasStore.setState({ contextMenu:{type:'node', id, x:e.clientX, y:e.clientY}} as any);
+          }}
         >
           <sphereGeometry args={[0.2, 16, 16]} />
           <meshStandardMaterial color={selected ? '#ff6b6b' : '#61dafb'} />

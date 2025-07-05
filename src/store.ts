@@ -11,7 +11,7 @@ interface HistoryState {
 
 interface CanvasStore {
   history: HistoryState;
-  selectedNodeId?: string;
+  selectedNodeIds: Set<string>;
   mode: 'select' | 'draw-edge';
   tempEdgeSource?: string;
   // actions
@@ -22,6 +22,8 @@ interface CanvasStore {
   undo: () => void;
   redo: () => void;
   setData: (data: CanvasData) => void;
+  toggleSelect: (id: string, additive: boolean) => void;
+  clearSelection: () => void;
 }
 
 const deepClone = <T,>(obj: T): T => JSON.parse(JSON.stringify(obj));
@@ -31,6 +33,7 @@ const emptyData: CanvasData = { nodes: [], edges: [] };
 export const useCanvasStore = create<CanvasStore>((set, get) => ({
   history: { past: [], present: emptyData, future: [] },
   mode: 'select',
+  selectedNodeIds: new Set(),
 
   createNode: (pos) => {
     set(produce((state: CanvasStore) => {
@@ -42,13 +45,13 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
   },
 
   deleteSelected: () => {
-    const sel = get().selectedNodeId;
-    if (!sel) return;
+    const selSet = get().selectedNodeIds;
+    if (selSet.size===0) return;
     set(produce((state: CanvasStore) => {
       state.history.past.push(deepClone(state.history.present));
-      state.history.present.nodes = state.history.present.nodes.filter((n) => n.id !== sel);
-      state.history.present.edges = state.history.present.edges.filter((e) => e.from !== sel && e.to !== sel);
-      state.selectedNodeId = undefined;
+      state.history.present.nodes = state.history.present.nodes.filter((n) => !selSet.has(n.id));
+      state.history.present.edges = state.history.present.edges.filter((e) => !selSet.has(e.from) && !selSet.has(e.to));
+      state.selectedNodeIds.clear();
       state.history.future = [];
     }));
   },
@@ -71,7 +74,7 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
         }));
       }
     } else {
-      set({ selectedNodeId: id });
+      set({ selectedNodeIds: new Set([id]) });
     }
   },
 
@@ -96,4 +99,17 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
   },
 
   setData: (data) => set({ history: { past: [], present: data, future: [] } }),
+
+  toggleSelect: (id, additive) => {
+    set(produce((state: CanvasStore)=>{
+      if(!additive){ state.selectedNodeIds.clear(); }
+      if(state.selectedNodeIds.has(id)){
+        state.selectedNodeIds.delete(id);
+      } else {
+        state.selectedNodeIds.add(id);
+      }
+    }));
+  },
+
+  clearSelection: () => set(produce((s:CanvasStore)=>{s.selectedNodeIds.clear();})),
 }));
