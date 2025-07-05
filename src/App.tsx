@@ -43,7 +43,7 @@ export default function App() {
   }, []);
 
   const updateContent = (newContent: string) => {
-    setFiles((prev) => ({ ...prev, [currentFile]: newContent }));
+    setFiles((prev: Record<string, string>) => ({ ...prev, [currentFile]: newContent }));
   };
 
   return (
