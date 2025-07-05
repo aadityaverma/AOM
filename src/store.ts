@@ -15,6 +15,7 @@ interface CanvasStore {
   mode: 'select' | 'draw-edge';
   tempEdgeSource?: string;
   contextMenu?: { type: 'node' | 'canvas'; id?: string; x: number; y: number };
+  clipboardNode: CanvasNode | undefined;
   // actions
   createNode: (pos: [number, number, number]) => void;
   deleteSelected: () => void;
@@ -27,6 +28,8 @@ interface CanvasStore {
   clearSelection: () => void;
   showContextMenu: (payload: { type: 'node' | 'canvas'; id?: string; x: number; y: number }) => void;
   hideContextMenu: () => void;
+  copyNode: (id: string) => void;
+  pasteNode: (pos: [number, number, number]) => void;
 }
 
 const deepClone = <T,>(obj: T): T => JSON.parse(JSON.stringify(obj));
@@ -38,6 +41,7 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
   mode: 'select',
   selectedNodeIds: new Set(),
   contextMenu: undefined,
+  clipboardNode: undefined,
 
   createNode: (pos) => {
     set(produce((state: CanvasStore) => {
@@ -119,4 +123,20 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
 
   showContextMenu: (payload) => set({ contextMenu: payload }),
   hideContextMenu: () => set({ contextMenu: undefined }),
+
+  copyNode: (id) => {
+    const node = get().history.present.nodes.find((n)=>n.id===id);
+    if(node){
+      set({ clipboardNode: deepClone(node) });
+    }
+  },
+
+  pasteNode: (pos) => {
+    const clip = (get() as any).clipboardNode as CanvasNode | undefined;
+    if(!clip) return;
+    const newNode = { ...deepClone(clip), id: nanoid(6), position: pos };
+    set(produce((state: CanvasStore)=>{
+      state.history.present.nodes.push(newNode);
+    }));
+  },
 }));

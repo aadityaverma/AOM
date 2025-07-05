@@ -7,6 +7,7 @@ import { CanvasData } from './types';
 import { CanvasSchema } from './schema';
 import Toolbar from './components/Toolbar';
 import { useCanvasStore } from './store';
+import ContextMenu from './components/ContextMenu';
 
 // Demo initial JSON
 const defaultContent = `{
@@ -77,6 +78,7 @@ export default function App() {
         <GraphCanvas data={graphData} />
       </ErrorBoundary>
       <Toolbar />
+      <ContextMenu />
     </div>
   );
 }
