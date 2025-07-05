@@ -98,3 +98,28 @@ body {
 .toolbar button:hover {
   background: #666;
 }
+
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+  color: #fff;
+  font-size: 1.5rem;
+}
+
+.error-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: #c00;
+  color: #fff;
+  padding: 0.5rem;
+  z-index: 3001;
+  text-align: center;
+  cursor: pointer;
+}

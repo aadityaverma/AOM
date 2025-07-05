@@ -1,5 +1,5 @@
-import { Canvas, useThree } from '@react-three/fiber';
-import { OrbitControls, Text, TransformControls, Cone } from '@react-three/drei';
+import { Canvas } from '@react-three/fiber';
+import { OrbitControls, Text, TransformControls } from '@react-three/drei';
 import { useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 
@@ -49,36 +49,31 @@ function Node({ id, position, label }: { id: string; position: [number, number, 
   );
 }
 
-function Edge({ from, to, color = 'white', label, arrow }: { from: [number, number, number]; to: [number, number, number]; color?: string; label?: string; arrow?: 'none' | 'arrow' | 'both' }) {
+function Edge({ from, to, color = 'white', label, curve = 'straight' }: { from: [number, number, number]; to: [number, number, number]; color?: string; label?: string; curve?: 'straight'|'bezier' }) {
   const start = useMemo(() => new THREE.Vector3(...from), [from]);
   const end = useMemo(() => new THREE.Vector3(...to), [to]);
-  const points = useMemo(() => [start, end], [start, end]);
-  const geometry = useMemo(() => new THREE.BufferGeometry().setFromPoints(points), [points]);
-  const mid = useMemo(() => start.clone().add(end).multiplyScalar(0.5), [start, end]);
-  const dir = useMemo(() => end.clone().sub(start).normalize(), [start, end]);
-
-  const arrowSize = 0.15;
+  const points = useMemo(() => {
+    if(curve==='bezier'){
+      const mid = start.clone().add(end).multiplyScalar(0.5);
+      const c1 = start.clone().lerp(mid,0.5).add(new THREE.Vector3(0,0.5,0));
+      const c2 = end.clone().lerp(mid,0.5).add(new THREE.Vector3(0,-0.5,0));
+      const curve3 = new THREE.CubicBezierCurve3(start,c1,c2,end);
+      return curve3.getPoints(20);
+    }
+    return [start,end];
+  },[start,end,curve]);
+  const geometry = useMemo(()=>{
+    const g = new THREE.BufferGeometry().setFromPoints(points);
+    return g;
+  },[points]);
+  const midPoint = useMemo(()=>points[Math.floor(points.length/2)],[points]);
   return (
     <group>
       <line geometry={geometry}>
         <lineBasicMaterial attach="material" color={color} />
       </line>
-      {(arrow === 'arrow' || arrow === 'both') && (
-        <mesh position={end} rotation={new THREE.Euler().setFromVector3(new THREE.Vector3().setFromMatrixPosition(new THREE.Matrix4().lookAt(end, start, new THREE.Vector3(0, 1, 0))))}>
-          <coneGeometry args={[arrowSize, arrowSize * 2, 8]} />
-          <meshStandardMaterial color={color} />
-        </mesh>
-      )}
-      {arrow === 'both' && (
-        <mesh position={start} rotation={new THREE.Euler().setFromVector3(new THREE.Vector3().setFromMatrixPosition(new THREE.Matrix4().lookAt(start, end, new THREE.Vector3(0, 1, 0))))}>
-          <coneGeometry args={[arrowSize, arrowSize * 2, 8]} />
-          <meshStandardMaterial color={color} />
-        </mesh>
-      )}
       {label && (
-        <Text position={mid.toArray() as [number, number, number]} fontSize={0.25} color={color} anchorX="center" anchorY="middle">
-          {label}
-        </Text>
+        <Text position={midPoint.toArray() as [number,number,number]} fontSize={0.25} color={color} anchorX="center" anchorY="middle">{label}</Text>
       )}
     </group>
   );

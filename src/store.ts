@@ -16,6 +16,10 @@ interface CanvasStore {
   tempEdgeSource?: string;
   contextMenu?: { type: 'node' | 'canvas'; id?: string; x: number; y: number };
   clipboardNode: CanvasNode | undefined;
+  paletteOpen: boolean;
+  searchOpen: boolean;
+  loading: boolean;
+  error?: string;
   // actions
   createNode: (pos: [number, number, number]) => void;
   deleteSelected: () => void;
@@ -30,6 +34,12 @@ interface CanvasStore {
   hideContextMenu: () => void;
   copyNode: (id: string) => void;
   pasteNode: (pos: [number, number, number]) => void;
+  updateNode: (id: string, patch: Partial<CanvasNode>) => void;
+  groupSelected: () => void;
+  ungroupSelected: () => void;
+  setLoading: (b: boolean) => void;
+  setError: (msg?: string) => void;
+  togglePalette: () => void;
 }
 
 const deepClone = <T,>(obj: T): T => JSON.parse(JSON.stringify(obj));
@@ -42,6 +52,9 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
   selectedNodeIds: new Set(),
   contextMenu: undefined,
   clipboardNode: undefined,
+  paletteOpen: false,
+  searchOpen: false,
+  loading: false,
 
   createNode: (pos) => {
     set(produce((state: CanvasStore) => {
@@ -138,5 +151,49 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
     set(produce((state: CanvasStore)=>{
       state.history.present.nodes.push(newNode);
     }));
+  },
+
+  updateNode: (id, patch) => {
+    set(produce((state: CanvasStore) => {
+      const node = state.history.present.nodes.find((n) => n.id === id);
+      if (node) {
+        Object.assign(node, patch);
+      }
+    }));
+  },
+
+  groupSelected: () => {
+    const sel = Array.from(get().selectedNodeIds);
+    if (sel.length < 2) return;
+    const gid = nanoid(6);
+    set(produce((state: CanvasStore) => {
+      state.history.present.nodes.forEach((n) => {
+        if (state.selectedNodeIds.has(n.id)) {
+          (n as any).group = gid;
+        }
+      });
+    }));
+  },
+
+  ungroupSelected: () => {
+    set(produce((state: CanvasStore) => {
+      state.history.present.nodes.forEach((n) => {
+        if (state.selectedNodeIds.has(n.id)) {
+          delete (n as any).group;
+        }
+      });
+    }));
+  },
+
+  setLoading: (b) => {
+    set({ loading: b });
+  },
+
+  setError: (msg) => {
+    set({ error: msg });
+  },
+
+  togglePalette: () => {
+    set({ paletteOpen: !get().paletteOpen });
   },
 }));

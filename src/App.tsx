@@ -8,6 +8,9 @@ import { CanvasSchema } from './schema';
 import Toolbar from './components/Toolbar';
 import { useCanvasStore } from './store';
 import ContextMenu from './components/ContextMenu';
+import CommandPalette from './components/CommandPalette';
+import GlobalOverlays from './components/GlobalOverlays';
+import { useShortcuts } from './hooks/useShortcuts';
 
 // Demo initial JSON
 const defaultContent = `{
@@ -70,6 +73,9 @@ export default function App() {
     setFiles((prev: Record<string, string>) => ({ ...prev, [currentFile]: newContent }));
   };
 
+  // Keyboard shortcuts
+  useShortcuts();
+
   return (
     <div className="app-container">
       <Sidebar fileNames={Object.keys(files)} current={currentFile} onSelect={setCurrentFile} />
@@ -79,6 +85,8 @@ export default function App() {
       </ErrorBoundary>
       <Toolbar />
       <ContextMenu />
+      <CommandPalette />
+      <GlobalOverlays />
     </div>
   );
 }
