@@ -63,3 +63,12 @@ body {
 .canvas-wrapper {
   flex: 1;
 }
+
+.error-box {
+  background: #2e2e2e;
+  color: #ff6b6b;
+  padding: 0.5rem;
+  overflow: auto;
+  max-height: 150px;
+  font-size: 0.75rem;
+}

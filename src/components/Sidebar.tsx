@@ -1,3 +1,5 @@
+import type React from 'react';
+
 interface SidebarProps {
   fileNames: string[];
   current: string;

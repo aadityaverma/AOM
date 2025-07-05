@@ -1,31 +1,35 @@
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Text } from '@react-three/drei';
+import { OrbitControls, Text, TransformControls } from '@react-three/drei';
 import { useMemo } from 'react';
 import * as THREE from 'three';
 
-import { GraphData } from '../types';
+import { CanvasData } from '../types';
 
 interface GraphCanvasProps {
-  data: GraphData;
+  data: CanvasData;
 }
 
-function Node({ position, label }: { position: [number, number, number]; label: string }) {
+function Node({ position, label }: { position: [number, number, number]; label?: string }) {
   return (
-    <group position={position}>
-      <mesh>
-        <sphereGeometry args={[0.2, 16, 16]} />
-        <meshStandardMaterial color="#61dafb" />
-      </mesh>
-      <Text
-        position={[0, 0.5, 0]}
-        fontSize={0.25}
-        color="white"
-        anchorX="center"
-        anchorY="middle"
-      >
-        {label}
-      </Text>
-    </group>
+    <TransformControls>
+      <group position={position}>
+        <mesh>
+          <sphereGeometry args={[0.2, 16, 16]} />
+          <meshStandardMaterial color="#61dafb" />
+        </mesh>
+        {label && (
+          <Text
+            position={[0, 0.5, 0]}
+            fontSize={0.25}
+            color="white"
+            anchorX="center"
+            anchorY="middle"
+          >
+            {label}
+          </Text>
+        )}
+      </group>
+    </TransformControls>
   );
 }
 
@@ -44,6 +48,10 @@ export default function GraphCanvas({ data }: GraphCanvasProps) {
     <Canvas camera={{ position: [3, 3, 3] }} className="canvas-wrapper">
       <ambientLight intensity={0.5} />
       <pointLight position={[10, 10, 10]} />
+
+      {/* helpers */}
+      <gridHelper args={[50, 50, '#444', '#222']} />
+      <axesHelper args={[5]} />
 
       {data.edges.map((edge, idx) => {
         const fromNode = data.nodes.find((n) => n.id === edge.from);

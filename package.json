@@ -13,7 +13,8 @@
     "react-dom": "^18.2.0",
     "three": "^0.161.0",
     "@react-three/fiber": "^8.13.6",
-    "@react-three/drei": "^9.82.6"
+    "@react-three/drei": "^9.82.6",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.0.2",

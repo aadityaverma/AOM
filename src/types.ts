@@ -1,15 +1,24 @@
-export interface NodeData {
+export interface CanvasNode {
   id: string;
-  label: string;
+  type?: string;
+  label?: string;
+  file?: string;
   position: [number, number, number];
+  x?: number;
+  y?: number;
+  z?: number;
+  width?: number;
+  height?: number;
+  color?: string;
 }
 
-export interface EdgeData {
+export interface CanvasEdge {
+  id?: string;
   from: string;
   to: string;
 }
 
-export interface GraphData {
-  nodes: NodeData[];
-  edges: EdgeData[];
+export interface CanvasData {
+  nodes: CanvasNode[];
+  edges: CanvasEdge[];
 }
