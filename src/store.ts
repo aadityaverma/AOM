@@ -14,6 +14,7 @@ interface CanvasStore {
   selectedNodeIds: Set<string>;
   mode: 'select' | 'draw-edge';
   tempEdgeSource?: string;
+  contextMenu?: { type: 'node' | 'canvas'; id?: string; x: number; y: number };
   // actions
   createNode: (pos: [number, number, number]) => void;
   deleteSelected: () => void;
@@ -24,6 +25,8 @@ interface CanvasStore {
   setData: (data: CanvasData) => void;
   toggleSelect: (id: string, additive: boolean) => void;
   clearSelection: () => void;
+  showContextMenu: (payload: { type: 'node' | 'canvas'; id?: string; x: number; y: number }) => void;
+  hideContextMenu: () => void;
 }
 
 const deepClone = <T,>(obj: T): T => JSON.parse(JSON.stringify(obj));
@@ -34,6 +37,7 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
   history: { past: [], present: emptyData, future: [] },
   mode: 'select',
   selectedNodeIds: new Set(),
+  contextMenu: undefined,
 
   createNode: (pos) => {
     set(produce((state: CanvasStore) => {
@@ -112,4 +116,7 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
   },
 
   clearSelection: () => set(produce((s:CanvasStore)=>{s.selectedNodeIds.clear();})),
+
+  showContextMenu: (payload) => set({ contextMenu: payload }),
+  hideContextMenu: () => set({ contextMenu: undefined }),
 }));

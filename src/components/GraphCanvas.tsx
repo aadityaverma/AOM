@@ -26,7 +26,8 @@ function Node({ id, position, label }: { id: string; position: [number, number, 
           }}
           onContextMenu={(e)=>{
             e.preventDefault();
-            useCanvasStore.setState({ contextMenu:{type:'node', id, x:e.clientX, y:e.clientY}} as any);
+            const showMenu = useCanvasStore.getState().showContextMenu;
+            showMenu({type:'node', id, x:e.clientX, y:e.clientY});
           }}
         >
           <sphereGeometry args={[0.2, 16, 16]} />
