@@ -1,0 +1,19 @@
+version: '3.8'
+services:
+  dev:
+    build:
+      context: .
+      target: dev
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    environment:
+      - NODE_ENV=development
+  prod:
+    build:
+      context: .
+      target: prod
+    ports:
+      - "8080:80"

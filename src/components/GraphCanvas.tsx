@@ -4,18 +4,23 @@ import { useMemo } from 'react';
 import * as THREE from 'three';
 
 import { CanvasData } from '../types';
+import { useCanvasStore } from '../store';
 
 interface GraphCanvasProps {
   data: CanvasData;
 }
 
-function Node({ position, label }: { position: [number, number, number]; label?: string }) {
+function Node({ id, position, label }: { id: string; position: [number, number, number]; label?: string }) {
+  const selected = useCanvasStore((s) => s.selectedNodeId === id);
+  const click = useCanvasStore((s) => s.nodeClicked);
   return (
     <TransformControls>
       <group position={position}>
-        <mesh>
+        <mesh
+          onClick={() => click(id)}
+        >
           <sphereGeometry args={[0.2, 16, 16]} />
-          <meshStandardMaterial color="#61dafb" />
+          <meshStandardMaterial color={selected ? '#ff6b6b' : '#61dafb'} />
         </mesh>
         {label && (
           <Text
@@ -61,7 +66,7 @@ export default function GraphCanvas({ data }: GraphCanvasProps) {
       })}
 
       {data.nodes.map((node) => (
-        <Node key={node.id} position={node.position} label={node.label} />
+        <Node key={node.id} id={node.id} position={node.position} label={node.label} />
       ))}
 
       <OrbitControls />

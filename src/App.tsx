@@ -5,6 +5,8 @@ import GraphCanvas from './components/GraphCanvas';
 import ErrorBoundary from './components/ErrorBoundary';
 import { CanvasData } from './types';
 import { CanvasSchema } from './schema';
+import Toolbar from './components/Toolbar';
+import { useCanvasStore } from './store';
 
 // Demo initial JSON
 const defaultContent = `{
@@ -47,6 +49,13 @@ export default function App() {
   const content = files[currentFile] ?? '';
   const { data: graphData, errors } = useMemo(() => parseGraph(content), [content]);
 
+  const setStoreData = useCanvasStore((s) => s.setData);
+
+  // Sync parsed data into canvas store
+  useEffect(() => {
+    setStoreData(graphData);
+  }, [graphData, setStoreData]);
+
   useEffect(() => {
     localStorage.setItem('files', JSON.stringify(files));
   }, [files]);
@@ -67,6 +76,7 @@ export default function App() {
       <ErrorBoundary fallback={<div style={{ color: 'red' }}>Failed to render 3-D view</div>}>
         <GraphCanvas data={graphData} />
       </ErrorBoundary>
+      <Toolbar />
     </div>
   );
 }
